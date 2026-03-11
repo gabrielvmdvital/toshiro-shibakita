@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: Senha123
+      MYSQL_DATABASE: meubanco
+    volumes:
+      - ./banco.sql:/docker-entrypoint-initdb.d/banco.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: Senha123
+      DB_NAME: meubanco
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: Senha123
+      DB_NAME: meubanco
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app3:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: Senha123
+      DB_NAME: meubanco
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "4500:4500"
+    depends_on:
+      - app1
+      - app2
+      - app3
